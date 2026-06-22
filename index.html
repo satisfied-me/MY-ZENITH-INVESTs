@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENITH App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Mobile Container to mimic a phone screen */
+        .phone-container {
+            width: 100%;
+            max-width: 410px;
+            background-color: #f4f5f9;
+            height: 100vh;
+            max-height: 840px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Views management */
+        .view-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 85px; 
+            display: none;
+        }
+
+        .view-content.active-view {
+            display: block;
+        }
+
+        /* --- AUTH VIEW STYLES --- */
+        .auth-container {
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            background: #ffffff;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .auth-logo {
+            font-size: 36px;
+            font-weight: 700;
+            color: #7b2cbf;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .auth-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: #f5f6fa;
+            padding: 6px;
+            border-radius: 14px;
+            margin-bottom: 28px;
+        }
+
+        .auth-toggle-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #777;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-toggle-btn.active {
+            background: #ffffff;
+            color: #7b2cbf;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active-form {
+            display: block;
+        }
+
+        /* --- HOME VIEW STYLES --- */
+        .header {
+            padding: 24px 20px 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .brand-title { font-size: 26px; font-weight: 700; color: #111; }
+        .brand-subtitle { font-size: 14px; color: #777; margin-top: 4px; }
+        
+        .notification-box {
+            position: relative;
+            background: #f0ebf8;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff5722;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #7b2cbf, #6930c3);
+            margin: 0 20px;
+            padding: 24px;
+            border-radius: 24px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(105, 48, 195, 0.25);
+        }
+
+        .balance-label { font-size: 14px; opacity: 0.8; font-weight: 500; }
+        .balance-amount { font-size: 32px; font-weight: 700; margin: 12px 0 20px 0; letter-spacing: -0.5px; }
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .btn {
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-withdraw { background: transparent; color: white; border: 1.5px solid rgba(255, 255, 255, 0.6); }
+        .btn-deposit { background: #ffb703; color: #fff; box-shadow: 0 4px 12px rgba(255, 183, 3, 0.3); }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+
+        .feature-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .icon-wrapper { width: 54px; height: 54px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; margin-bottom: 8px; }
+        .f-cash { background-color: #ffeef2; color: #e91e63; }
+        .f-telegram { background-color: #e8f4fd; color: #1e88e5; }
+        .f-support { background-color: #e8f8f0; color: #2e7d32; }
+        .f-task { background-color: #fff4e6; color: #f57c00; }
+        .feature-label { font-size: 12px; font-weight: 500; color: #555; }
+
+        .section-title-container { display: flex; justify-content: space-between; align-items: center; padding: 0 20px 12px 20px; }
+        .section-title { font-size: 20px; font-weight: 700; color: #111; }
+        .badge-vip { background-color: #fff4e6; color: #f57c00; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+
+        /* Store Product Cards */
+        .product-card {
+            border: 1px solid #e2e8f0;
+            margin: 0 20px 16px 20px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .vip-tag { position: absolute; top: 0; right: 0; background: #7b2cbf; color: white; font-size: 10px; font-weight: 700; padding: 6px 14px; border-bottom-left-radius: 14px; }
+        .product-card.premium-border { border: 1.5px solid #ffb703; }
+        .product-card.premium-border .vip-tag { background: #ffb703; color: #111; }
+        
+        .product-body { padding: 20px; }
+        .product-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #111;}
+        .product-price-tag { font-size: 15px; font-weight: 700; color: #7b2cbf; margin-bottom: 12px; }
+        .product-card.premium-border .product-price-tag { color: #f57c00; }
+        
+        .product-stats { display: flex; justify-content: space-between; border-top: 1px solid #f0f0f0; padding-top: 12px; margin-bottom: 14px; }
+        .stat-box .label { font-size: 11px; color: #999; margin-bottom: 4px; }
+        .stat-box .value { font-size: 14px; font-weight: 600; color: #333; }
+        
+        .btn-buy {
+            width: 100%;
+            padding: 12px;
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .product-card.premium-border .btn-buy { background: #fff4e6; color: #f57c00; }
+        .btn-buy:active { transform: scale(0.98); }
+
+        /* --- WITHDRAW VIEW STYLES --- */
+        .withdraw-padding { padding: 24px 20px; }
+        .form-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+            border: 1px solid #f1f1f5;
+            margin-bottom: 28px;
+        }
+        .input-group { margin-bottom: 20px; }
+        .input-label { font-size: 14px; font-weight: 600; color: #44444f; margin-bottom: 10px; display: block; }
+        
+        /* FIXED POSITION CONTAINER FOR SYMBOL */
+        .amount-input-wrapper { 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            width: 100%;
+        }
+        
+        .currency-symbol { 
+            position: absolute; 
+            left: 16px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #111115; 
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .form-input {
+            width: 100%;
+            background-color: #f5f6fa;
+            border: 1px solid transparent;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 15px;
+            color: #111115;
+            outline: none;
+        }
+        
+        /* FIXED PADDING OVERRIDE SO THE PLACEHOLDER STAYS AWAY FROM NAIRA */
+        .form-input.amount-field { 
+            padding-left: 38px !important; 
+        }
+        
+        .form-input:focus { background-color: #ffffff; border-color: #7b2cbf; }
+
+        .btn-confirm {
+            width: 100%;
+            background: #7b2cbf;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+        }
+
+        .record-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #f1f1f5;
+            margin-bottom: 10px;
+        }
+        .record-left { display: flex; align-items: center; gap: 14px; }
+        .icon-circle { width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; }
+        .icon-circle.up { background-color: #e8f8f0; color: #34a853; }
+        .icon-circle.down { background-color: #feeef2; color: #e91e63; }
+        .record-info .amount { font-size: 15px; font-weight: 700; color: #171725; }
+        .record-info .date { font-size: 11px; color: #92929d; margin-top: 2px; }
+        .record-right { text-align: right; }
+        .status-check { color: #34a853; font-size: 16px; font-weight: bold; }
+        .status-pending { color: #ffb703; font-size: 16px; font-weight: bold; }
+        .status-rejected { color: #ff3333; font-size: 16px; font-weight: bold; }
+        .status-text { font-size: 9px; font-weight: 700; color: #696974; letter-spacing: 0.5px; }
+
+        /* --- INCOME VIEW STYLES --- */
+        .income-padding { padding: 20px; background-color: #fcfcfd; min-height: 100%; }
+        
+        .earnings-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+            border: 1px solid #f1f1f5;
+            margin-bottom: 24px;
+        }
+        .earnings-title { font-size: 13px; color: #696974; font-weight: 500; margin-bottom: 6px; }
+        .earnings-value { font-size: 26px; font-weight: 700; color: #34a853; }
+        .pulse-icon { width: 44px; height: 44px; background: #e8f8f0; color: #34a853; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+
+        .income-title { font-size: 20px; font-weight: 700; color: #171725; margin-bottom: 16px; }
+        
+        .device-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #f1f1f5;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.01);
+        }
+        .device-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .device-name { font-size: 18px; font-weight: 700; color: #171725; }
+        .status-running { background: #e8f8f0; color: #34a853; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 12px; }
+        .device-invested { font-size: 13px; color: #92929d; margin-bottom: 16px; }
+        
+        .device-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background: #f5f6fa;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+        .device-stat-label { font-size: 12px; color: #92929d; margin-bottom: 4px; }
+        .device-stat-val { font-size: 15px; font-weight: 700; color: #171725; }
+        .device-stat-val.green-text { color: #34a853; }
+
+        .progress-container { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #92929d; margin-top: 12px; }
+        .progress-bar-bg { width: 60%; height: 6px; background: #f1f1f5; border-radius: 3px; overflow: hidden; position: relative; }
+        .progress-bar-fill { height: 100%; background: #7b2cbf; width: 0%; border-radius: 3px; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: #92929d; font-size: 14px; }
+
+        /* --- ME / USER VIEW STYLES --- */
+        .me-banner {
+            background: #6a0dad;
+            padding: 30px 20px 40px 20px;
+            text-align: left;
+            position: relative;
+            color: white;
+        }
+        
+        .me-banner-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .me-avatar-circle {
+            width: 64px;
+            height: 64px;
+            background-color: #8a2be2;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .me-user-details h3 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .me-user-details p {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+
+        .me-balance-container {
+            background: #ffffff;
+            border-radius: 16px;
+            margin: -25px 16px 20px 16px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 5;
+        }
+
+        .me-balance-info .lbl {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .me-balance-info .val {
+            font-size: 22px;
+            font-weight: 700;
+            color: #e63946;
+            margin-top: 4px;
+        }
+
+        .me-wallet-btn {
+            background: linear-gradient(90deg, #ff9f1c, #ffb703);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(255, 159, 28, 0.2);
+        }
+
+        .me-grid-menu {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 0 16px 20px 16px;
+        }
+
+        .me-grid-item {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,0,0,0.01);
+            transition: background 0.2s;
+        }
+
+        .me-grid-item:active {
+            background: #f1f3f9;
+        }
+
+        .me-grid-icon-circle {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background-color: #f3e8ff;
+            color: #6a0dad;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .me-grid-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        /* --- BOTTOM NAVIGATION BAR LAYOUT --- */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            display: none; 
+            grid-template-columns: repeat(6, 1fr); 
+            padding: 8px 0 12px 0;
+            box-shadow: 0 -3px 12px rgba(0,0,0,0.03);
+            z-index: 100;
+        }
+        .bottom-nav.authenticated {
+            display: grid;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #9ca3af; 
+            font-size: 12px;
+            font-weight: 500;
+            gap: 2px;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        .nav-item.active { 
+            color: #7b2cbf; 
+        }
+        .nav-icon-svg {
+            width: 26px;
+            height: 26px;
+            fill: currentColor;
+            transition: color 0.1s;
+        }
+        
+        .nav-news-dot {
+            position: absolute;
+            top: 2px;
+            right: 16px;
+            width: 6px;
+            height: 6px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            display: none;
+        }
+
+        /* --- ADMIN PANEL VIEWS & REWRITES --- */
+        .admin-badge-title { font-size: 22px; font-weight: 700; color: #e91e63; }
+        .admin-sub-card { background: #fdf2f4; border: 1px solid #f8d7da; border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+        .admin-section-heading { font-size: 16px; font-weight: 700; margin: 20px 0 10px 0; color: #333; border-left: 4px solid #e91e63; padding-left: 8px; }
+        .admin-action-row { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-admin-accept { background: #2e7d32; color: #fff; padding: 8px 12px; font-size: 12px; border-radius: 8px; border:none; cursor:pointer;}
+        .btn-admin-reject { background: #c62828; color: #fff; padding: 8px 12px; font-size: 12px; border-radius: 8px; border:none; cursor:pointer;}
+        .btn-admin-ban { background: #333; color: #fff; padding: 6px 10px; font-size: 11px; border-radius: 6px; border:none; cursor:pointer;}
+        
+        .msg-box-wrapper { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; margin-bottom: 8px; font-size: 13px; }
+        .msg-box-time { font-size: 10px; color: #999; text-align: right; margin-top: 4px; }
+
+        /* Dynamic Admin Items List Styles */
+        .admin-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+        .admin-item-actions button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        
+        <div id="authView" class="view-content active-view" style="padding-bottom: 0;">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <div class="auth-logo">ZENITH PLATFORM</div>
+                    <div class="auth-subtitle">Sustainable Energy Ventures</div>
+                </div>
+
+                <div class="auth-toggle">
+                    <button id="toggleLogin" class="auth-toggle-btn active" onclick="switchAuthTab('login')">Login</button>
+                    <button id="toggleSignup" class="auth-toggle-btn" onclick="switchAuthTab('signup')">Sign Up</button>
+                </div>
+
+                <div id="loginForm" class="auth-form active-form">
+                    <div class="input-group">
+                        <label class="input-label">Phone Number / Email</label>
+                        <input type="text" id="loginIdField" class="form-input" placeholder="Enter registration details">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 28px;">
+                        <label class="input-label">Password</label>
+                        <input type="password" id="loginPasswordField" class="form-input" placeholder="••••••••">
+                    </div>
+                    <button class="btn-confirm" onclick="handleAuth(false)">Sign In</button>
+                </div>
+
+                <div id="signupForm" class="auth-form">
+                    <div class="input-group">
+                        <label class="input-label">Full Name</label>
+                        <input type="text" id="signupNameField" class="form-input" placeholder="John Doe">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Phone Number</label>
+                        <input type="tel" id="signupPhoneField" class="form-input" placeholder="08012345678">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 28px;">
+                        <label class="input-label">Create Password</label>
+                        <input type="password" id="signupPasswordField" class="form-input" placeholder="Minimum 6 characters">
+                    </div>
+                    <button class="btn-confirm" onclick="handleAuth(true)">Create Account</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="homeView" class="view-content">
+            <div class="header">
+                <div>
+                    <h1 class="brand-title">ZENITH</h1>
+                    <p class="brand-subtitle">Power your future with solar</p>
+                </div>
+                <div class="notification-box" onclick="switchView('newsView', 'newsNav')">
+                    <span>🔔</span>
+                    <span class="badge" id="globalNotificationBadge">0</span>
+                </div>
+            </div>
+
+            <div class="balance-card">
+                <div class="balance-label">Available Balance</div>
+                <div class="balance-amount" id="userBalanceDisplay">₦0</div>
+                <div class="action-buttons">
+                    <button class="btn btn-withdraw" onclick="switchView('withdrawView', null)">↗ Withdraw</button>
+                    <button class="btn btn-deposit" onclick="openUserDepositModal()">💵 Bank Deposit</button>
+                </div>
+            </div>
+
+            <div id="userDepositCodeContainer" style="background:#fff; border: 1px solid #f1f1f5; margin: 12px 20px; border-radius:14px; padding:14px; display:none;">
+                <h4 style="font-size:14px; margin-bottom:8px; font-weight:600;">Redeem Deposit Voucher</h4>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <input type="text" id="userRedeemCodeInput" class="form-input" placeholder="Enter generated deposit code here..." style="padding:10px;">
+                </div>
+                <button class="btn-confirm" style="padding:10px; font-size:14px; border-radius:10px;" onclick="processUserVoucherRedeem()">Claim Voucher Value</button>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-item" onclick="openSpinWheelModal()"><div class="icon-wrapper f-cash">🎁</div><span class="feature-label">Free Cash</span></div>
+                <div class="feature-item"><div class="icon-wrapper f-telegram">💬</div><span class="feature-label">Telegram</span></div>
+                <div class="feature-item"><div class="icon-wrapper f-support">🎧</div><span class="feature-label">Support</span></div>
+                <div class="feature-item"><div class="icon-wrapper f-task">📋</div><span class="feature-label">Task</span></div>
+            </div>
+
+            <div class="section-title-container">
+                <h2 class="section-title">Investment Products</h2>
+                <span class="badge-vip">MARKET</span>
+            </div>
+
+            <div id="investmentProductsMarketplaceContainer"></div>
+        </div>
+
+        <div id="spinWheelModal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">
+            <div style="background: #ffffff; width: 90%; max-width: 360px; border-radius: 24px; padding: 24px; text-align: center; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+                <span style="position: absolute; top: 14px; right: 20px; font-size: 22px; color: #999; cursor: pointer; font-weight: bold;" onclick="closeSpinWheelModal()">×</span>
+                <h3 style="font-size: 18px; font-weight: 700; color: #111; margin-bottom: 4px;">Lucky Spin Wheel</h3>
+                <p id="spinRemainingCounter" style="font-size: 12px; color: #7b2cbf; font-weight: 600; margin-bottom: 20px;">Spins remaining today: 5/5</p>
+                
+                <div style="position: relative; width: 240px; height: 240px; margin: 0 auto 20px auto;">
+                    <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #ff5722; z-index: 10;"></div>
+                    <canvas id="wheelCanvas" width="240" height="240" style="border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 4s cubic-bezier(0.1, 1, 0.1, 1);"></canvas>
+                </div>
+
+                <button id="spinWheelActionBtn" class="btn-confirm" style="background: linear-gradient(135deg, #7b2cbf, #6930c3); padding: 14px; border-radius: 14px;" onclick="executeWheelSpinAction()">SPIN NOW</button>
+            </div>
+        </div>
+
+        <div id="userDepositModal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+            <div style="background: #ffffff; width: 90%; max-width: 360px; border-radius: 24px; padding: 20px; text-align: left; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3); max-height:90%; overflow-y:auto;">
+                <span style="position: absolute; top: 14px; right: 20px; font-size: 24px; color: #999; cursor: pointer; font-weight: bold;" onclick="closeUserDepositModal()">×</span>
+                <h3 style="font-size: 18px; font-weight: 700; color: #111; margin-bottom: 15px; text-align:center;">Bank Deposit</h3>
+                
+                <div id="depositStepAmount">
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size:13px; display:block; margin-bottom:5px; color:#555;">Enter Intended Funding Amount (₦)</label>
+                        <input type="number" id="userDepositAmountInput" class="form-input" style="padding:12px;" placeholder="e.g. 5000">
+                    </div>
+                    <button type="button" class="btn-confirm" onclick="proceedToPaymentDetails()">Next: View Account Details</button>
+                </div>
+
+                <div id="depositStepPayment" style="display:none;">
+                    <div style="background: #f8f9fa; border: 1px dashed #7b2cbf; padding: 12px; border-radius: 12px; margin-bottom: 14px; font-size: 13px; color:#333;">
+                        <p style="font-weight:600; margin-bottom:6px; color:#7b2cbf;">Please make your transfer to:</p>
+                        <p style="margin:3px 0;"><strong>Bank:</strong> <span id="displayAdminBank"></span></p>
+                        <p style="margin:3px 0;"><strong>Account Number:</strong> <span id="displayAdminAccountNum"></span></p>
+                        <p style="margin:3px 0;"><strong>Account Name:</strong> <span id="displayAdminAccountName"></span></p>
+                        <p style="margin-top:8px; color:#e63946; font-size:14px;"><strong>Amount Due:</strong> ₦<span id="displayDepositAmountDue">0</span></p>
+                    </div>
+
+                    <div style="margin-bottom: 8px;">
+                        <label style="font-size:12px; display:block; margin-bottom:4px; color:#555;">Your Bank Name (Sender)</label>
+                        <input type="text" id="userSenderBank" class="form-input" style="padding:10px;" placeholder="e.g. GTBank">
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size:12px; display:block; margin-bottom:4px; color:#555;">Your Account Name / Phone (Sender)</label>
+                        <input type="text" id="userSenderName" class="form-input" style="padding:10px;" placeholder="Exact sender name">
+                    </div>
+
+                    <button type="button" class="btn-confirm" style="background:#ffb703; color:#fff;" onclick="submitDepositNotificationToAdmin()">Notify Admin Done</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="incomeView" class="view-content income-padding">
+            <div id="incomeActiveContent" style="display: none;">
+                <div class="earnings-card">
+                    <div>
+                        <div class="earnings-title">Total Active Yield</div>
+                        <div class="earnings-value" id="todayEarningsDisplay">₦0/day</div>
+                    </div>
+                    <div class="pulse-icon">📈</div>
+                </div>
+
+                <h2 class="income-title">Active Devices</h2>
+                <div id="activeDevicesContainer"></div>
+            </div>
+
+            <div id="incomeEmptyState" class="empty-state">
+                <p>No active investment plans running yet.<br>Go to the Home view and select a product to invest.</p>
+            </div>
+        </div>
+
+        <div id="newsView" class="view-content" style="padding: 20px;">
+            <h2 style="font-size: 20px; font-weight:700; margin-bottom:12px;">Notifications & News</h2>
+            <div id="userNotificationsInbox">
+                <p style="color:#777; font-size:14px;">No official announcements or messages listed yet.</p>
+            </div>
+        </div>
+
+        <div id="chatView" class="view-content" style="padding: 20px;">
+            <h2 style="font-size: 20px; font-weight:700; margin-bottom:12px;">Community Chat</h2>
+            <p style="color:#777; font-size:14px;">Connect with other team users instantly.</p>
+        </div>
+
+        <div id="teamView" class="view-content" style="padding: 20px;">
+            <h2 style="font-size: 20px; font-weight:700; margin-bottom:4px;">Referrals & Team</h2>
+            <p style="color:#777; font-size:14px; margin-bottom:20px;">Track your downline network tiers and active structure rewards.</p>
+            
+            <div class="form-card" style="padding:16px; text-align:center;">
+                <div style="font-size:13px; color:#666; margin-bottom:4px;">Total Team Members</div>
+                <div style="font-size:24px; font-weight:700; color:#7b2cbf; margin-bottom:12px;">0 Users</div>
+                <button class="btn-confirm" style="font-size:13px; padding:10px; border-radius:10px;" onclick="alert('Referral link copied to clipboard!')">Copy Invitation Link</button>
+            </div>
+        </div>
+
+        <div id="meView" class="view-content" style="background-color: #f4f5f9;">
+            <div class="me-banner">
+                <div class="me-banner-profile">
+                    <div class="me-avatar-circle">Z</div>
+                    <div class="me-user-details">
+                        <h3 id="meProfileName">0907208859</h3>
+                        <p id="meProfileId">Invitation code: 6778006</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="me-balance-container">
+                <div class="me-balance-info">
+                    <div class="lbl">Available Balance</div>
+                    <div class="val" id="meSubcardBalance">₦0.00</div>
+                </div>
+                <button class="me-wallet-btn" onclick="switchView('withdrawView', null)">
+                    Wallet <span>➔</span>
+                </button>
+            </div>
+
+            <div class="me-grid-menu">
+                <div class="me-grid-item">
+                    <div class="me-grid-icon-circle" style="background-color: #e0f2fe; color: #0284c7;">🎧</div>
+                    <div class="me-grid-label">Customer<br>service</div>
+                </div>
+                <div class="me-grid-item">
+                    <div class="me-grid-icon-circle" style="background-color: #fef3c7; color: #d97706;">❓</div>
+                    <div class="me-grid-label">FAQ</div>
+                </div>
+                <div class="me-grid-item" onclick="switchView('securitySettingsView', null)">
+                    <div class="me-grid-icon-circle" style="background-color: #fee2e2; color: #dc2626;">🔒</div>
+                    <div class="me-grid-label">Change<br>password</div>
+                </div>
+                <div class="me-grid-item">
+                    <div class="me-grid-icon-circle" style="background-color: #e0e7ff; color: #4f46e5;">📝</div>
+                    <div class="me-grid-label">Feedback</div>
+                </div>
+                <div class="me-grid-item">
+                    <div class="me-grid-icon-circle" style="background-color: #f3e8ff; color: #7c3aed;">👥</div>
+                    <div class="me-grid-label">About US</div>
+                </div>
+                <div class="me-grid-item">
+                    <div class="me-grid-icon-circle" style="background-color: #fae8ff; color: #c026d3;">📖</div>
+                    <div class="me-grid-label">Term of use</div>
+                </div>
+                <div class="me-grid-item">
+                    <div class="me-grid-icon-circle" style="background-color: #ecfdf5; color: #059669;">📥</div>
+                    <div class="me-grid-label">APP<br>Download</div>
+                </div>
+                <div class="me-grid-item" onclick="handleLogOut()">
+                    <div class="me-grid-icon-circle" style="background-color: #fff1f2; color: #e11d48;">L</div>
+                    <div class="me-grid-label">log out</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="withdrawView" class="view-content withdraw-padding">
+            <div class="form-card">
+                <div class="input-group">
+                    <label class="input-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">₦</span>
+                        <input type="text" id="withdrawAmountInput" class="form-input amount-field" placeholder="Enter withdrawal amount">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Account Number</label>
+                    <input type="text" id="withdrawAccountNum" class="form-input" placeholder="10-digit account number" maxlength="10">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Account Name</label>
+                    <input type="text" id="withdrawAccountName" class="form-input" placeholder="Exact name on account">
+                </div>
+                <button type="button" class="btn-confirm" onclick="processWithdrawalTransaction()">Confirm Withdrawal</button>
+            </div>
+
+            <h2 class="section-title">Withdrawal Record</h2>
+            <div id="withdrawalRecordContainer">
+                <div class="empty-state" style="padding: 30px 20px;">
+                    <p>No withdrawal requests submitted yet.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="securitySettingsView" class="view-content withdraw-padding">
+            <h2 class="income-title" style="margin-bottom:20px;">Update Password</h2>
+            <div class="form-card">
+                <div class="input-group">
+                    <label class="input-label">Current Password</label>
+                    <input type="password" id="oldPasswordInput" class="form-input" placeholder="Enter old password">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">New Password</label>
+                    <input type="password" id="newPasswordInput" class="form-input" placeholder="Minimum 6 characters">
+                </div>
+                <div class="input-group" style="margin-bottom:24px;">
+                    <label class="input-label">Confirm New Password</label>
+                    <input type="password" id="confirmNewPasswordInput" class="form-input" placeholder="Re-enter new password">
+                </div>
+                <button type="button" class="btn-confirm" onclick="processPasswordUpdate()">Update Profile Security</button>
+            </div>
+        </div>
+
+        <div id="adminDashboardView" class="view-content" style="padding: 20px; background: #fffcfd;">
+            <div class="header" style="padding: 0 0 16px 0;">
+                <div>
+                    <h1 class="admin-badge-title">Admin Core Deck</h1>
+                    <p class="brand-subtitle">System Administration Panel</p>
+                </div>
+                <button class="btn-admin-ban" style="background:#ff5722;" onclick="handleLogOut()">Exit Deck</button>
+            </div>
+
+            <div class="admin-section-heading">Configure Bank Deposit Details</div>
+            <div class="form-card" style="padding: 14px;">
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <input type="text" id="adminBankName" class="form-input" style="padding:10px; font-size:13px;" placeholder="Bank Name (e.g., Access Bank)">
+                </div>
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <input type="text" id="adminAccountNum" class="form-input" style="padding:10px; font-size:13px;" placeholder="Account Number">
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <input type="text" id="adminAccountName" class="form-input" style="padding:10px; font-size:13px;" placeholder="Account Name">
+                </div>
+                <button type="button" class="btn-confirm" style="background:#7b2cbf; padding:10px; font-size:13px; border-radius:10px;" onclick="saveAdminBankDetails()">Save Bank Details</button>
+            </div>
+
+            <div class="admin-section-heading">Pending Deposit Requests</div>
+            <div id="adminDepositRequestsContainer" style="max-height:220px; overflow-y:auto; margin-bottom:16px; background:#f9f9f9; padding:8px; border-radius:12px;">
+                <p style="color:#777; font-size:13px; text-align:center; padding:10px;">No pending deposit requests.</p>
+            </div>
+
+            <div class="admin-section-heading">Manage Investment Sections</div>
+            <div class="form-card" style="padding: 14px;">
+                <h4 id="adminPlanFormTitle" style="font-size:13px; font-weight:700; margin-bottom:8px; color:#7b2cbf;">Create New Investment Plan</h4>
+                <input type="hidden" id="adminPlanEditIndex" value="">
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <input type="text" id="adminPlanName" class="form-input" style="padding:10px; font-size:13px;" placeholder="Plan Name (e.g., ZENITH VIP Ultimate)">
+                </div>
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <input type="number" id="adminPlanTier" class="form-input" style="padding:10px; font-size:13px;" placeholder="Tier Rank Number (e.g., 3)">
+                </div>
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <input type="number" id="adminPlanCost" class="form-input" style="padding:10px; font-size:13px;" placeholder="Price Cost (₦)">
+                </div>
+                <div style="display: flex; gap:8px; margin-bottom:12px;">
+                    <input type="number" id="adminPlanReturn" class="form-input" style="padding:10px; font-size:13px; width:50%;" placeholder="Daily Income (₦)">
+                    <input type="number" id="adminPlanDays" class="form-input" style="padding:10px; font-size:13px; width:50%;" placeholder="Validity Days">
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-confirm" id="adminSavePlanBtn" style="background:#7b2cbf; padding:10px; font-size:13px; border-radius:10px;" onclick="executeAdminSaveInvestmentPlan()">Save Investment Plan</button>
+                    <button class="btn-admin-ban" id="adminCancelPlanEditBtn" style="background:#9ca3af; display:none; padding:10px; border-radius:10px; font-size:13px;" onclick="resetAdminInvestmentPlanForm()">Cancel</button>
+                </div>
+            </div>
+
+            <div class="admin-section-heading">Current Active Products Market</div>
+            <div id="adminInvestmentProductsList" style="margin-bottom: 20px;"></div>
+
+            <div class="admin-section-heading">Registered System Users</div>
+            <div id="adminUsersMetricList" style="margin-bottom: 20px;"></div>
+
+            <div class="admin-section-heading">Direct Account Balance Adjustment</div>
+            <div class="form-card" style="padding: 14px;">
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <input type="text" id="adminDirectPhone" class="form-input" style="padding:10px; font-size:13px;" placeholder="User Registered Phone Number">
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <input type="number" id="adminDirectAmount" class="form-input" style="padding:10px; font-size:13px;" placeholder="Amount (Can be negative to subtract)">
+                </div>
+                <button class="btn-confirm" style="background:#0284c7; padding:10px; font-size:13px; border-radius:10px;" onclick="executeAdminDirectBalanceAdjustment()">Adjust User Wallet</button>
+            </div>
+
+            <div class="admin-section-heading">Pending Withdrawal Requests</div>
+            <div id="adminWithdrawalRequestsList" style="margin-bottom: 20px;"></div>
+
+            <div class="admin-section-heading">Dispatch Box Notification Messages</div>
+            <div class="form-card" style="padding: 14px;">
+                <div class="input-group" style="margin-bottom: 8px;">
+                    <select id="adminMsgTargetType" class="form-input" style="padding:10px; font-size:13px; height:auto;" onchange="document.getElementById('adminMsgTargetPhoneInput').style.display = this.value==='SINGLE'?'block':'none'">
+                        <option value="ALL">Broadcast to All Users</option>
+                        <option value="SINGLE">Target Specific Phone Account</option>
+                    </select>
+                </div>
+                <div class="input-group" id="adminMsgTargetPhoneInput" style="margin-bottom: 8px; display:none;">
+                    <input type="text" id="adminMsgTargetPhone" class="form-input" style="padding:10px; font-size:13px;" placeholder="Target Phone Number">
+                </div>
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <textarea id="adminMsgContent" class="form-input" style="padding:10px; font-size:13px; height:70px; resize:none;" placeholder="Type system notice message text details here..."></textarea>
+                </div>
+                <button class="btn-confirm" style="background:#e91e63; padding:10px; font-size:13px; border-radius:10px;" onclick="executeAdminSendSystemMessage()">Dispatch Notification</button>
+            </div>
+
+            <div class="admin-section-heading">Generate Deposit Voucher Codes</div>
+            <div class="form-card" style="padding: 14px; margin-bottom:10px;">
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <input type="number" id="adminCodeAmount" class="form-input" style="padding:10px; font-size:13px;" placeholder="Voucher Face Value Amount (₦)">
+                </div>
+                <button class="btn-confirm" style="background:#ffb703; color:#111; padding:10px; font-size:13px; border-radius:10px;" onclick="executeAdminGenerateCode()">Generate Voucher Pin</button>
+            </div>
+
+            <div class="admin-section-heading">Active Unused Deposit Tokens</div>
+            <div id="adminVoucherTokensList" style="margin-bottom:20px;"></div>
+        </div>
+
+        <nav class="bottom-nav" id="bottomNavBar">
+            <div class="nav-item active" id="homeNav" onclick="switchView('homeView', 'homeNav')">
+                <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" id="incomeNav" onclick="switchView('incomeView', 'incomeNav')">
+                <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                <span>Earnings</span>
+            </div>
+            <div class="nav-item" id="newsNav" onclick="switchView('newsView', 'newsNav')">
+                <div class="nav-news-dot" id="newsDotIndicator"></div>
+                <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4V7h4v4zm-5-4v4H5V7h9zM5 12h14v2H5v-2zm0 4h14v2H5v-2z"/></svg>
+                <span>News</span>
+            </div>
+            <div class="nav-item" id="chatNav" onclick="switchView('chatView', 'chatNav')">
+                <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+                <span>Chat</span>
+            </div>
+            <div class="nav-item" id="teamNav" onclick="switchView('teamView', 'teamNav')">
+                <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                <span>Team</span>
+            </div>
+            <div class="nav-item" id="meNav" onclick="switchView('meView', 'meNav')">
+                <svg class="nav-icon-svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span>Me</span>
+            </div>
+        </nav>
+
+    </div>
+
+    <script>
+        // --- DATA LAYER LOCAL STORAGE ENGINE MANAGEMENT HANDLERS ---
+        function getRegisteredUsers() {
+            let data = localStorage.getItem("zenith_users");
+            return data ? JSON.parse(data) : {};
+        }
+        function saveRegisteredUsers(obj) {
+            localStorage.setItem("zenith_users", JSON.stringify(obj));
+        }
+        function getDepositCodes() {
+            let data = localStorage.getItem("zenith_codes");
+            return data ? JSON.parse(data) : {};
+        }
+        function saveDepositCodes(obj) {
+            localStorage.setItem("zenith_codes", JSON.stringify(obj));
+        }
+        function getWithdrawalRequests() {
+            let data = localStorage.getItem("zenith_withdrawals");
+            return data ? JSON.parse(data) : [];
+        }
+        function saveWithdrawalRequests(arr) {
+            localStorage.setItem("zenith_withdrawals", JSON.stringify(arr));
+        }
+        function getInvestmentProductsMarket() {
+            let data = localStorage.getItem("zenith_products_market");
+            if (!data) {
+                let defaultMarket = [
+                    { name: "Zenith Customers Tier 1", tier: 1, cost: 3000, dailyReturn: 1000, validityDays: 10 },
+                    { name: "zenith Array Tier 2", tier: 2, cost: 7000, dailyReturn: 2000, validityDays: 10 },
+                    { name: "zenith Grid Mega 3", tier: 3, cost: 12000, dailyReturn: 4000, validityDays: 10 }
+                ];
+                localStorage.setItem("zenith_products_market", JSON.stringify(defaultMarket));
+                return defaultMarket;
+            }
+            return JSON.parse(data);
+        }
+        function saveInvestmentProductsMarket(arr) {
+            localStorage.setItem("zenith_products_market", JSON.stringify(arr));
+        }
+
+        // --- BANK DEPOSIT PERSISTENCE HELPERS ---
+        function getAdminBankConfig() {
+            let saved = localStorage.getItem("zenith_admin_bank");
+            return saved ? JSON.parse(saved) : { 
+                bank: "YOUR_BANK_NAME", 
+                account: "YOUR_ACCOUNT_NUMBER", 
+                name: "YOUR_ACCOUNT_NAME" 
+            };
+        }
+        function getDepositRequests() {
+            let saved = localStorage.getItem("zenith_deposit_requests");
+            return saved ? JSON.parse(saved) : [];
+        }
+        function saveDepositRequests(arr) {
+            localStorage.setItem("zenith_deposit_requests", JSON.stringify(arr));
+        }
+
+        // STATE CONTROLLERS
+        let activeUser = null;
+
+        // AUTH TAB SWITCH LOGIC
+        function switchAuthTab(type) {
+            document.getElementById('toggleLogin').classList.remove('active');
+            document.getElementById('toggleSignup').classList.remove('active');
+            document.getElementById('loginForm').classList.remove('active-form');
+            document.getElementById('signupForm').classList.remove('active-form');
+
+            if(type === 'login') {
+                document.getElementById('toggleLogin').classList.add('active');
+                document.getElementById('loginForm').classList.add('active-form');
+            } else {
+                document.getElementById('toggleSignup').classList.add('active');
+                document.getElementById('signupForm').classList.add('active-form');
+            }
+        }
+
+        // NAVIGATION LOGIC ROUTERS
+        function switchView(targetViewId, activeNavId) {
+            let views = document.querySelectorAll('.view-content');
+            views.forEach(v => v.classList.remove('active-view'));
+            
+            let target = document.getElementById(targetViewId);
+            if(target) target.classList.add('active-view');
+
+            let navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(n => n.classList.remove('active'));
+
+            if(activeNavId) {
+                let activeNav = document.getElementById(activeNavId);
+                if(activeNav) activeNav.classList.add('active');
+            }
+            
+            // Trigger contextual view renders
+            if(targetViewId === 'homeView') { renderUserMarketplaceProducts(); updateUIBalances(); }
+            if(targetViewId === 'incomeView') { renderUserActiveInvestedDevices(); }
+            if(targetViewId === 'withdrawView') { renderUserWithdrawalHistoryRecords(); }
+            if(targetViewId === 'newsView') { renderUserNotificationsInbox(); }
+            if(targetViewId === 'adminDashboardView') { renderAdminDashboardStreams(); }
+        }
+
+        // REGISTRATION & AUTH LOGIN LOGISTICS
+        function handleAuth(isSignup) {
+            let users = getRegisteredUsers();
+
+            if(isSignup) {
+                let name = document.getElementById('signupNameField').value.trim();
+                let phone = document.getElementById('signupPhoneField').value.trim();
+                let pass = document.getElementById('signupPasswordField').value.trim();
+
+                if(!name || !phone || !pass) { alert("Fill all registration fields."); return; }
+                if(pass.length < 6) { alert("Password must be at least 6 characters."); return; }
+                if(users[phone]) { alert("This phone number is already registered."); return; }
+
+                users[phone] = {
+                    name: name,
+                    phone: phone,
+                    password: pass,
+                    balance: 0,
+                    totalEarnings: 0,
+                    investments: [],
+                    messages: [
+                        { id: "SYS-INIT", sender: "WELCOME CORE", text: "Welcome to Zenith invest Renewable Power Ventures! Invest in solar setups to start yielding daily revenue returns.", date: new Date().toLocaleString() }
+                    ],
+                    spinsLeft: 5,
+                    lastSpinDate: ""
+                };
+
+                saveRegisteredUsers(users);
+                alert("Account created successfully! Please sign in.");
+                switchAuthTab('login');
+                document.getElementById('loginIdField').value = phone;
+            } else {
+                let idInput = document.getElementById('loginIdField').value.trim();
+                let passInput = document.getElementById('loginPasswordField').value.trim();
+
+                if(!idInput || !passInput) { alert("Please input your login details."); return; }
+
+                // TRAP SYSTEM ADMIN OVERRIDE ACCESS
+                if(idInput === "0907208859" && passInput === "6778006") {
+                    activeUser = { phone: "ADMINISTRATOR", name: "System Admin Core" };
+                    document.getElementById('bottomNavBar').classList.add('authenticated');
+                    switchView('adminDashboardView', null);
+                    return;
+                }
+
+                if(!users[idInput] || users[idInput].password !== passInput) {
+                    alert("Invalid phone profile credentials or wrong password.");
+                    return;
+                }
+
+                activeUser = users[idInput];
+                document.getElementById('bottomNavBar').classList.add('authenticated');
+                switchView('homeView', 'homeNav');
+            }
+        }
+
+        function handleLogOut() {
+            activeUser = null;
+            document.getElementById('bottomNavBar').classList.remove('authenticated');
+            document.getElementById('loginIdField').value = "";
+            document.getElementById('loginPasswordField').value = "";
+            switchView('authView', null);
+        }
+
+        // UPDATE RUNTIME WALLET COUNTERS
+        function updateUIBalances() {
+            if(!activeUser || activeUser.phone === "ADMINISTRATOR") return;
+            let users = getRegisteredUsers();
+            let freshData = users[activeUser.phone];
+            if(!freshData) return;
+
+            activeUser.balance = freshData.balance;
+            activeUser.totalEarnings = freshData.totalEarnings;
+
+            document.getElementById('userBalanceDisplay').innerText = "₦" + activeUser.balance.toFixed(2);
+            document.getElementById('meSubcardBalance').innerText = activeUser.balance.toFixed(2) + "₦";
+            document.getElementById('meProfileName').innerText = activeUser.phone;
+            document.getElementById('meProfileId').innerText = "Investor: " + freshData.name;
+
+            // Update Notification Badge Count Tracker
+            let unreadCount = freshData.messages ? freshData.messages.length : 0;
+            document.getElementById('globalNotificationBadge').innerText = unreadCount;
+            let dot = document.getElementById('newsDotIndicator');
+            if(dot) dot.style.display = unreadCount > 0 ? 'block' : 'none';
+        }
+
+        // --- USER BANK DEPOSIT MODAL ACTIONS ---
+        function openUserDepositModal() {
+            document.getElementById('userDepositModal').style.display = 'flex';
+            document.getElementById('depositStepAmount').style.display = 'block';
+            document.getElementById('depositStepPayment').style.display = 'none';
+            document.getElementById('userDepositAmountInput').value = "";
+        }
+
+        function closeUserDepositModal() {
+            document.getElementById('userDepositModal').style.display = 'none';
+        }
+
+        function proceedToPaymentDetails() {
+            let amt = parseFloat(document.getElementById('userDepositAmountInput').value);
+            if(isNaN(amt) || amt <= 0) { 
+                alert("Please enter a valid deposit amount."); 
+                return; 
+            }
+            
+            let config = getAdminBankConfig();
+            document.getElementById('displayAdminBank').innerText = config.bank;
+            document.getElementById('displayAdminAccountNum').innerText = config.account;
+            document.getElementById('displayAdminAccountName').innerText = config.name;
+            document.getElementById('displayDepositAmountDue').innerText = amt.toLocaleString();
+            
+            document.getElementById('depositStepAmount').style.display = 'none';
+            document.getElementById('depositStepPayment').style.display = 'block';
+        }
+
+        function submitDepositNotificationToAdmin() {
+            let amt = parseFloat(document.getElementById('userDepositAmountInput').value);
+            let sBank = document.getElementById('userSenderBank').value.trim();
+            let sName = document.getElementById('userSenderName').value.trim();
+            
+            if(!sBank || !sName) { 
+                alert("Please enter your sender payment details for verification."); 
+                return; 
+            }
+            
+            let currentUserPhone = activeUser ? activeUser.phone : "Unknown";
+
+            let reqs = getDepositRequests();
+            let newRequest = {
+                id: "DEP-" + Date.now().toString().substring(8),
+                user: currentUserPhone,
+                amount: amt,
+                senderBank: sBank,
+                senderName: sName,
+                status: "PENDING",
+                timestamp: new Date().toLocaleString()
+            };
+            
+            reqs.unshift(newRequest);
+            saveDepositRequests(reqs);
+            
+            alert("Notification sent! Admin will review your transfer status.");
+            closeUserDepositModal();
+            
+            document.getElementById('userSenderBank').value = "";
+            document.getElementById('userSenderName').value = "";
+        }
+
+        // TOGGLE CODE BOX REDEEM
+        function toggleUserDepositVoucherBox() {
+            let el = document.getElementById('userDepositCodeContainer');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // REDEEM MANUAL VOUCHER INTERFACES
+        function processUserVoucherRedeem() {
+            if(!activeUser) return;
+            let pinCode = document.getElementById('userRedeemCodeInput').value.trim();
+            if(!pinCode) return;
+
+            let db = getDepositCodes();
+            if(!db[pinCode] || !db[pinCode].active) {
+                alert("Invalid, expired, or generic voucher code pin value.");
+                return;
+            }
+
+            let valueAmount = db[pinCode].amount;
+            db[pinCode].active = false;
+            saveDepositCodes(db);
+
+            let users = getRegisteredUsers();
+            users[activeUser.phone].balance += valueAmount;
+            
+            if(!users[activeUser.phone].messages) users[activeUser.phone].messages = [];
+            users[activeUser.phone].messages.unshift({
+                id: "REDEEM-" + Math.floor(Math.random()*100000),
+                sender: "FINANCIAL DESK",
+                text: `Voucher Token code ${pinCode} was successfully processed. Credit wallet balance added with ₦${valueAmount}.`,
+                date: new Date().toLocaleString()
+            });
+
+            saveRegisteredUsers(users);
+            document.getElementById('userRedeemCodeInput').value = "";
+            alert(`Success! Redeemed ₦${valueAmount} onto your profile wallet balance.`);
+            updateUIBalances();
+        }
+
+        // MARKETPLACE DISPLAYS
+        function renderUserMarketplaceProducts() {
+            let container = document.getElementById('investmentProductsMarketplaceContainer');
+            if(!container) return;
+            let list = getInvestmentProductsMarket();
+
+            let html = "";
+            list.forEach((p, idx) => {
+                html += `
+                <div class="product-card ${p.tier >= 3 ? 'premium-border' : ''}">
+                    <div class="vip-tag">VIP TIER ${p.tier}</div>
+                    <div class="product-body">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-price-tag">Investment Amount: ₦${p.cost}</div>
+                        
+                        <div class="product-stats">
+                            <div class="stat-box">
+                                <div class="label">Daily Profit Yield</div>
+                                <div class="value">₦${p.dailyReturn}/day</div>
+                            </div>
+                            <div class="stat-box" style="text-align:right;">
+                                <div class="label">Contract Period</div>
+                                <div class="value">${p.validityDays} Days</div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn-buy" onclick="executeUserPurchasePlanAction(${idx})">Activate Power Plan</button>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // INVESTMENT PLANS TRANSACTIONS HOOKS
+        function executeUserPurchasePlanAction(index) {
+            if(!activeUser) return;
+            let list = getInvestmentProductsMarket();
+            let plan = list[index];
+
+            let users = getRegisteredUsers();
+            let buyer = users[activeUser.phone];
+
+            if(buyer.balance < plan.cost) {
+                alert("Insufficient wallet balance available. Please contact admin or initiate a deposit request.");
+                return;
+            }
+
+            buyer.balance -= plan.cost;
+
+            let now = Date.now();
+            buyer.investments.push({
+                name: plan.name,
+                cost: plan.cost,
+                dailyReturn: plan.dailyReturn,
+                validityDays: plan.validityDays,
+                activatedTime: now,
+                lastHarvestTime: now,
+                collectedCount: 0
+            });
+
+            buyer.messages.unshift({
+                id: "BUY-" + Math.floor(Math.random()*100000),
+                sender: "LOGISTICS OPS",
+                text: `Successfully acquired device array plan: ${plan.name}. Your daily revenue cycle starts generating returns immediately.`,
+                date: new Date().toLocaleString()
+            });
+
+            saveRegisteredUsers(users);
+            alert(`Activated ${plan.name} setup sequence successfully!`);
+            updateUIBalances();
+        }
+
+        // EARNINGS RENDER HARVEST PANEL LOGISTICS
+        function renderUserActiveInvestedDevices() {
+            let activeContent = document.getElementById('incomeActiveContent');
+            let emptyState = document.getElementById('incomeEmptyState');
+            let container = document.getElementById('activeDevicesContainer');
+
+            if(!activeUser) return;
+            let users = getRegisteredUsers();
+            let data = users[activeUser.phone];
+
+            if(!data || !data.investments || data.investments.length === 0) {
+                activeContent.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            activeContent.style.display = 'block';
+            emptyState.style.display = 'none';
+
+            let totalDailyYield = 0;
+            let html = "";
+
+            let now = Date.now();
+
+            data.investments.forEach((inv, idx) => {
+                totalDailyYield += inv.dailyReturn;
+                
+                // Real-time Harvest calculation algorithm logic
+                let elapsedMs = now - inv.lastHarvestTime;
+                let singleDayMs = 24 * 60 * 60 * 1000; 
+                let pendingRevenue = (elapsedMs / singleDayMs) * inv.dailyReturn;
+                if(pendingRevenue < 0) pendingRevenue = 0;
+
+                // cap progress values 
+                let percentProgress = (inv.collectedCount / inv.validityDays) * 100;
+                if(percentProgress > 100) percentProgress = 100;
+
+                html += `
+                <div class="device-card">
+                    <div class="device-header">
+                        <div class="device-name">${inv.name}</div>
+                        <span class="status-running">YIELDING</span>
+                    </div>
+                    <div class="device-invested">Capital Investment Stake: ₦${inv.cost}</div>
+                    
+                    <div class="device-stats-grid">
+                        <div>
+                            <div class="device-stat-label">Accumulated Profit Available</div>
+                            <div class="device-stat-val green-text">₦${pendingRevenue.toFixed(4)}</div>
+                        </div>
+                        <div>
+                            <div class="device-stat-label">Rate Stream</div>
+                            <div class="device-stat-val">₦${inv.dailyReturn}/24h</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-confirm" style="padding:10px 14px; font-size:13px; border-radius:10px;" onclick="executeHarvestAccumulatedYield(${idx})">Harvest Current Accumulated Profit</button>
+
+                    <div class="progress-container">
+                        <span>Contract Lifespan Progress</span>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${percentProgress}%;"></div>
+                        </div>
+                        <span>${inv.collectedCount}/${inv.validityDays}d</span>
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById('todayEarningsDisplay').innerText = "₦" + totalDailyYield + "/day";
+            container.innerHTML = html;
+        }
+
+        // HARVEST ACTION REVENUE STREAMING EXECUTION
+        function executeHarvestAccumulatedYield(index) {
+            if(!activeUser) return;
+            let users = getRegisteredUsers();
+            let userObj = users[activeUser.phone];
+            let inv = userObj.investments[index];
+
+            let now = Date.now();
+            let elapsedMs = now - inv.lastHarvestTime;
+            let singleDayMs = 24 * 60 * 60 * 1000;
+            
+            let earningsGained = (elapsedMs / singleDayMs) * inv.dailyReturn;
+
+            if (earningsGained < 0.01) {
+                alert("Accumulated yield value is too tiny to harvest yet. Please allow more run cycles to accumulate.");
+                return;
+            }
+
+            inv.lastHarvestTime = now;
+            inv.collectedCount = Math.floor((now - inv.activatedTime) / singleDayMs);
+            
+            userObj.balance += earningsGained;
+            userObj.totalEarnings += earningsGained;
+
+            saveRegisteredUsers(users);
+            alert(`Successfully harvested ₦${earningsGained.toFixed(2)} directly into available account wallet balance ledgers.`);
+            renderUserActiveInvestedDevices();
+        }
+
+        // NOTIFICATIONS INBOX DESK DISPLAY
+        function renderUserNotificationsInbox() {
+            let inbox = document.getElementById('userNotificationsInbox');
+            if(!inbox || !activeUser) return;
+
+            let users = getRegisteredUsers();
+            let list = users[activeUser.phone].messages || [];
+
+            if(list.length === 0) {
+                inbox.innerHTML = `<p style="color:#777; font-size:14px;">No system communication logs listed yet.</p>`;
+                return;
+            }
+
+            let html = "";
+            list.forEach(m => {
+                html += `
+                <div class="msg-box-wrapper">
+                    <div style="font-weight:700; color:#7b2cbf; margin-bottom:4px;">${m.sender}</div>
+                    <div>${m.text}</div>
+                    <div class="msg-box-time">${m.date}</div>
+                </div>`;
+            });
+            inbox.innerHTML = html;
+        }
+
+        // WITHDRAWAL CLIENT INTERACTION PIPELINE HOOKS
+        function processWithdrawalTransaction() {
+            if(!activeUser) return;
+            let amtVal = parseFloat(document.getElementById('withdrawAmountInput').value.trim());
+            let accNum = document.getElementById('withdrawAccountNum').value.trim();
+            let accName = document.getElementById('withdrawAccountName').value.trim();
+
+            if(isNaN(amtVal) || amtVal <= 0 || !accNum || !accName) {
+                alert("Please provide proper numerical amount values alongside complete bank details.");
+                return;
+            }
+
+            let users = getRegisteredUsers();
+            let profile = users[activeUser.phone];
+
+            if(profile.balance < amtVal) {
+                alert("Insufficient fund balances to process requested withdrawal payload.");
+                return;
+            }
+
+            profile.balance -= amtVal;
+            saveRegisteredUsers(users);
+
+            let withdrawalsDb = getWithdrawalRequests();
+            withdrawalsDb.unshift({
+                id: "WD-" + Math.floor(100000 + Math.random() * 900000),
+                phone: activeUser.phone,
+                amount: amtVal,
+                accountNumber: accNum,
+                accountName: accName,
+                status: "PENDING",
+                timestamp: new Date().toLocaleString()
+            });
+
+            saveWithdrawalRequests(withdrawalsDb);
+            alert("Withdrawal application submission complete. Admin processing review initialized.");
+            
+            document.getElementById('withdrawAmountInput').value = "";
+            document.getElementById('withdrawAccountNum').value = "";
+            document.getElementById('withdrawAccountName').value = "";
+            
+            renderUserWithdrawalHistoryRecords();
+        }
+
+        // WITHDRAWAL HISTORY RENDER RECORDS
+        function renderUserWithdrawalHistoryRecords() {
+            let container = document.getElementById('withdrawalRecordContainer');
+            if(!container || !activeUser) return;
+
+            let fullList = getWithdrawalRequests();
+            let userFiltered = fullList.filter(w => w.phone === activeUser.phone);
+
+            if(userFiltered.length === 0) {
+                container.innerHTML = `<div class="empty-state" style="padding: 30px 20px;"><p>No withdrawal requests submitted yet.</p></div>`;
+                return;
+            }
+
+            let html = "";
+            userFiltered.forEach(w => {
+                let statusClass = "status-pending";
+                if(w.status === "APPROVED") statusClass = "status-check";
+                if(w.status === "REJECTED") statusClass = "status-rejected";
+
+                html += `
+                <div class="record-card">
+                    <div class="record-left">
+                        <div class="icon-circle down">↘</div>
+                        <div class="record-info">
+                            <div class="amount">₦${w.amount}</div>
+                            <div class="date">${w.timestamp}</div>
+                        </div>
+                    </div>
+                    <div class="record-right">
+                        <div class="${statusClass}">${w.status === 'APPROVED' ? '✓' : w.status === 'PENDING' ? '⧗' : '✕'}</div>
+                        <div class="status-text">${w.status}</div>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // INTERACTIVE LUCKY SPIN WHEEL COMPONENT INTERFACES
+        let isWheelSpinning = false;
+        function openSpinWheelModal() {
+            if(!activeUser) return;
+            document.getElementById('spinWheelModal').style.display = 'flex';
+            renderWheelCanvasGraphicElements();
+            
+            let users = getRegisteredUsers();
+            let fresh = users[activeUser.phone];
+            
+            let todayStr = new Date().toDateString();
+            if(fresh.lastSpinDate !== todayStr) {
+                fresh.spinsLeft = 5;
+                fresh.lastSpinDate = todayStr;
+                saveRegisteredUsers(users);
+            }
+            document.getElementById('spinRemainingCounter').innerText = `Spins remaining today: ${fresh.spinsLeft}/5`;
+        }
+
+        function closeSpinWheelModal() {
+            if(isWheelSpinning) return;
+            document.getElementById('spinWheelModal').style.display = 'none';
+        }
+
+        const wheelSectors = [
+            { amount: 50, label: "₦50 Bonus", color: "#f72585" },
+            { amount: 0, label: "Try Again", color: "#7209b7" },
+            { amount: 500, label: "₦500 Max", color: "#3a0ca3" },
+            { amount: 10, label: "₦10 Mini", color: "#4361ee" },
+            { amount: 100, label: "₦100 Silver", color: "#4cc9f0" },
+            { amount: 0, label: "No Luck", color: "#ffb703" }
+        ];
+
+        function renderWheelCanvasGraphicElements() {
+            let canvas = document.getElementById('wheelCanvas');
+            if(!canvas) return;
+            let ctx = canvas.getContext('2d');
+            let numSectors = wheelSectors.length;
+            let arcSize = (2 * Math.PI) / numSectors;
+
+            ctx.clearRect(0,0,240,240);
+
+            for(let i=0; i<numSectors; i++) {
+                let sectorAngle = i * arcSize;
+                ctx.fillStyle = wheelSectors[i].color;
+                ctx.beginPath();
+                ctx.moveTo(120, 120);
+                ctx.arc(120, 120, 120, sectorAngle, sectorAngle + arcSize);
+                ctx.closePath();
+                ctx.fill();
+
+                // Write labels layout on canvas
+                ctx.save();
+                ctx.fillStyle = "#ffffff";
+                ctx.translate(120, 120);
+                ctx.rotate(sectorAngle + arcSize/2);
+                ctx.textAlign = "right";
+                ctx.font = "bold 11px sans-serif";
+                ctx.fillText(wheelSectors[i].label, 110, 5);
+                ctx.restore();
+            }
+        }
+
+        function executeWheelSpinAction() {
+            if(isWheelSpinning || !activeUser) return;
+            
+            let users = getRegisteredUsers();
+            let fresh = users[activeUser.phone];
+
+            if(fresh.spinsLeft <= 0) {
+                alert("Out of lucky reward wheel entries for today. Check back tomorrow!");
+                return;
+            }
+
+            fresh.spinsLeft--;
+            saveRegisteredUsers(users);
+            document.getElementById('spinRemainingCounter').innerText = `Spins remaining today: ${fresh.spinsLeft}/5`;
+
+            isWheelSpinning = true;
+            let canvas = document.getElementById('wheelCanvas');
+
+            let randomPickIdx = Math.floor(Math.random() * wheelSectors.length);
+            let sectorArcDegrees = 360 / wheelSectors.length;
+            
+            let targetRotationAngle = (360 - (randomPickIdx * sectorArcDegrees) - (sectorArcDegrees / 2));
+            let totalSpinRotationDegrees = 360 * 5 + targetRotationAngle; 
+
+            canvas.style.transform = `rotate(${totalSpinRotationDegrees}deg)`;
+
+            setTimeout(() => {
+                isWheelSpinning = false;
+                let finalWonSector = wheelSectors[randomPickIdx];
+                canvas.style.transition = "none";
+                canvas.style.transform = `rotate(${targetRotationAngle}deg)`;
+                setTimeout(() => { canvas.style.transition = "transform 4s cubic-bezier(0.1, 1, 0.1, 1)"; }, 50);
+
+                if(finalWonSector.amount > 0) {
+                    let finalDb = getRegisteredUsers();
+                    finalDb[activeUser.phone].balance += finalWonSector.amount;
+                    if(!finalDb[activeUser.phone].messages) finalDb[activeUser.phone].messages = [];
+                    finalDb[activeUser.phone].messages.unshift({
+                        id: "SPIN-" + Date.now(),
+                        sender: "LUCKY SPIN WHEEL",
+                        text: `Congratulations! You won a cash reward of ₦${finalWonSector.amount} from the interactive daily lucky prize wheel.`,
+                        date: new Date().toLocaleString()
+                    });
+                    saveRegisteredUsers(finalDb);
+                    alert(`Congratulations! You won a cash prize of: ${finalWonSector.label}`);
+                    updateUIBalances();
+                } else {
+                    alert("Unlucky spin this time! Better luck on your next wheel round.");
+                }
+            }, 4000);
+        }
+
+        // PASSWORD SECURITY LOGIC SUBMISSION
+        function processPasswordUpdate() {
+            if(!activeUser) return;
+            let oldP = document.getElementById('oldPasswordInput').value.trim();
+            let newP = document.getElementById('newPasswordInput').value.trim();
+            let confP = document.getElementById('confirmNewPasswordInput').value.trim();
+
+            if(!oldP || !newP || !confP) { alert("Complete security configuration field forms."); return; }
+            if(newP !== confP) { alert("New password matches mismatch confirmation text entries."); return; }
+
+            let users = getRegisteredUsers();
+            if(users[activeUser.phone].password !== oldP) { alert("Your specified current password is incorrect."); return; }
+
+            users[activeUser.phone].password = newP;
+            saveRegisteredUsers(users);
+
+            document.getElementById('oldPasswordInput').value = "";
+            document.getElementById('newPasswordInput').value = "";
+            document.getElementById('confirmNewPasswordInput').value = "";
+            alert("Security profiles updated! Password changed successfully.");
+        }
+
+        // ==========================================
+        // --- MASTER ADMIN INTERFACE RENDERERS ---
+        // ==========================================
+        function renderAdminDashboardStreams() {
+            renderAdminInvestmentPlansList();
+            renderAdminRegisteredUsersMetrics();
+            renderAdminWithdrawalApplications();
+            renderAdminVoucherPinTokens();
+            renderAdminDepositRequests();
+        }
+
+        // --- ADMIN BANK CONFIG IMPLEMENTATION ---
+        function saveAdminBankDetails() {
+            let bName = document.getElementById('adminBankName').value.trim();
+            let accNum = document.getElementById('adminAccountNum').value.trim();
+            let accName = document.getElementById('adminAccountName').value.trim();
+            
+            if(!bName || !accNum || !accName) { 
+                alert("Please complete all bank credential fields."); 
+                return; 
+            }
+            
+            localStorage.setItem("zenith_admin_bank", JSON.stringify({ bank: bName, account: accNum, name: accName }));
+            alert("Admin direct receipt bank credentials saved successfully!");
+        }
+
+        function renderAdminDepositRequests() {
+            let container = document.getElementById('adminDepositRequestsContainer');
+            if(!container) return;
+            
+            let reqs = getDepositRequests();
+            if(reqs.length === 0) {
+                container.innerHTML = `<p style="color:#777; font-size:13px; text-align:center; padding:10px;">No pending deposit requests.</p>`;
+                return;
+            }
+            
+            let html = "";
+            reqs.forEach((r, idx) => {
+                html += `
+                <div style="font-size:12px; margin-bottom:8px; background:${r.status==='PENDING'?'#fff8e7':'#f1f5f9'}; padding:10px; border-radius:8px; border:1px solid #ddd; color:#333;">
+                    <p style="margin:2px 0;"><strong>ID:</strong> ${r.id} [${r.status}]</p>
+                    <p style="margin:2px 0;"><strong>Sender Phone Account:</strong> ${r.user}</p>
+                    <p style="margin:2px 0;"><strong>Amount Request:</strong> ₦${r.amount.toLocaleString()}</p>
+                    <p style="margin:2px 0;"><strong>From Payee Bank:</strong> ${r.senderBank} (${r.senderName})</p>
+                    <p style="color:#777; font-size:10px; margin:4px 0 0 0;">${r.timestamp}</p>
+                    ${r.status === 'PENDING' ? `
+                    <div style="margin-top:8px; display:flex; gap:5px;">
+                        <button type="button" style="background:#2ec4b6; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="processAdminDepositDecision(${idx}, true)">Approve Credit</button>
+                        <button type="button" style="background:#e63946; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="processAdminDepositDecision(${idx}, false)">Reject</button>
+                    </div>` : ''}
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function processAdminDepositDecision(index, isApproved) {
+            let reqs = getDepositRequests();
+            let req = reqs[index];
+            let users = getRegisteredUsers();
+            
+            if(isApproved) {
+                req.status = "APPROVED";
+                if(users[req.user]) {
+                    users[req.user].balance = (parseFloat(users[req.user].balance) || 0) + req.amount;
+                    if(!users[req.user].messages) users[req.user].messages = [];
+                    users[req.user].messages.unshift({
+                        id: "DEP-APP-" + Date.now(),
+                        sender: "SYSTEM MANUAL DEPOSIT",
+                        text: `Your bank deposit confirmation request of ₦${req.amount} was verified. Wallet credited successfully.`,
+                        date: new Date().toLocaleString()
+                    });
+                } else {
+                    alert("Target user data row could not be found to assign balance increments.");
+                }
+            } else {
+                req.status = "REJECTED";
+            }
+            
+            saveDepositRequests(reqs);
+            saveRegisteredUsers(users);
+            renderAdminDepositRequests();
+        }
+
+        // CREATE OR EDIT INVESTMENT PLAN ITEMS
+        function executeAdminSaveInvestmentPlan() {
+            let name = document.getElementById('adminPlanName').value.trim();
+            let tier = parseInt(document.getElementById('adminPlanTier').value.trim());
+            let cost = parseFloat(document.getElementById('adminPlanCost').value.trim());
+            let daily = parseFloat(document.getElementById('adminPlanReturn').value.trim());
+            let days = parseInt(document.getElementById('adminPlanDays').value.trim());
+            let editIdxVal = document.getElementById('adminPlanEditIndex').value;
+
+            if(!name || isNaN(tier) || isNaN(cost) || isNaN(daily) || isNaN(days)) {
+                alert("Please fulfill complete plan configuration dimensions parameters.");
+                return;
+            }
+
+            let market = getInvestmentProductsMarket();
+            let dataPayload = { name: name, tier: tier, cost: cost, dailyReturn: daily, validityDays: days };
+
+            if(editIdxVal !== "") {
+                market[parseInt(editIdxVal)] = dataPayload;
+                alert("Investment blueprint schema configuration updated.");
+            } else {
+                market.push(dataPayload);
+                alert("New investment package asset class mapped into database.");
+            }
+
+            saveInvestmentProductsMarket(market);
+            resetAdminInvestmentPlanForm();
+            renderAdminDashboardStreams();
+        }
+
+        function resetAdminInvestmentPlanForm() {
+            document.getElementById('adminPlanFormTitle').innerText = "Create New Investment Plan";
+            document.getElementById('adminPlanEditIndex').value = "";
+            document.getElementById('adminPlanName').value = "";
+            document.getElementById('adminPlanTier').value = "";
+            document.getElementById('adminPlanCost').value = "";
+            document.getElementById('adminPlanReturn').value = "";
+            document.getElementById('adminPlanDays').value = "";
+            document.getElementById('adminCancelPlanEditBtn').style.display = "none";
+        }
+
+        function editAdminPlanItemTrigger(index) {
+            let market = getInvestmentProductsMarket();
+            let targetPlan = market[index];
+
+            document.getElementById('adminPlanFormTitle').innerText = "Editing: " + targetPlan.name;
+            document.getElementById('adminPlanEditIndex').value = index;
+            document.getElementById('adminPlanName').value = targetPlan.name;
+            document.getElementById('adminPlanTier').value = targetPlan.tier;
+            document.getElementById('adminPlanCost').value = targetPlan.cost;
+            document.getElementById('adminPlanReturn').value = targetPlan.dailyReturn;
+            document.getElementById('adminPlanDays').value = targetPlan.validityDays;
+            document.getElementById('adminCancelPlanEditBtn').style.display = "block";
+        }
+
+        function deleteAdminPlanItemTrigger(index) {
+            if(!confirm("Are you certain you wish to wipe out this plan package asset?")) return;
+            let market = getInvestmentProductsMarket();
+            market.splice(index, 1);
+            saveInvestmentProductsMarket(market);
+            renderAdminDashboardStreams();
+        }
+
+        function renderAdminInvestmentPlansList() {
+            let target = document.getElementById('adminInvestmentProductsList');
+            if(!target) return;
+            let market = getInvestmentProductsMarket();
+
+            if(market.length === 0) {
+                target.innerHTML = `<p style='color:#777; font-size:13px;'>No products found.</p>`;
+                return;
+            }
+
+            let html = "";
+            market.forEach((p, idx) => {
+                html += `
+                <div class="admin-item-row">
+                    <div><strong>T${p.tier}</strong> - ${p.name} (₦${p.cost})</div>
+                    <div class="admin-item-actions">
+                        <button style="color:#0284c7;" onclick="editAdminPlanItemTrigger(${idx})">Modify</button>
+                        <button style="color:#e11d48;" onclick="deleteAdminPlanItemTrigger(${idx})">Wipe</button>
+                    </div>
+                </div>`;
+            });
+            target.innerHTML = html;
+        }
+
+        // USER INDEX METRICS
+        function renderAdminRegisteredUsersMetrics() {
+            let target = document.getElementById('adminUsersMetricList');
+            if(!target) return;
+            let users = getRegisteredUsers();
+            let keys = Object.keys(users);
+
+            if(keys.length === 0) {
+                target.innerHTML = `<p style='color:#777; font-size:13px;'>No clients currently hosted.</p>`;
+                return;
+            }
+
+            let html = "";
+            keys.forEach(k => {
+                let u = users[k];
+                html += `
+                <div class="admin-sub-card" style="font-size:12px; margin-bottom:6px; background:#fff;">
+                    <p><strong>Profile:</strong> ${u.name} (${u.phone})</p>
+                    <p><strong>Wallet:</strong> ₦${u.balance.toFixed(2)} | <strong>Earned:</strong> ₦${u.totalEarnings.toFixed(2)}</p>
+                    <p><strong>Devices Active Count:</strong> ${u.investments ? u.investments.length : 0}</p>
+                </div>`;
+            });
+            target.innerHTML = html;
+        }
+
+        // DIRECT MANUAL WALLET CONTROLS
+        function executeAdminDirectBalanceAdjustment() {
+            let targetPhone = document.getElementById('adminDirectPhone').value.trim();
+            let adjustmentAmt = parseFloat(document.getElementById('adminDirectAmount').value.trim());
+
+            if(!targetPhone || isNaN(adjustmentAmt)) return;
+
+            let users = getRegisteredUsers();
+            if(!users[targetPhone]) { alert("Target account phone registration index not detected."); return; }
+
+            users[targetPhone].balance += adjustmentAmt;
+            
+            if(!users[targetPhone].messages) users[targetPhone].messages = [];
+            users[targetPhone].messages.unshift({
+                id: "ADJ-" + Math.floor(Math.random()*100000),
+                sender: "FINANCE DECK MANAGEMENT",
+                text: `Admin desk manually updated your available balance ledger. Adjustment differential: ₦${adjustmentAmt}.`,
+                date: new Date().toLocaleString()
+            });
+
+            saveRegisteredUsers(users);
+            document.getElementById('adminDirectPhone').value = "";
+            document.getElementById('adminDirectAmount').value = "";
+            alert("Wallet adjusted successfully.");
+            renderAdminDashboardStreams();
+        }
+
+        // WITHDRAWAL CONTROLLER DECISIONS
+        function renderAdminWithdrawalApplications() {
+            let target = document.getElementById('adminWithdrawalRequestsList');
+            if(!target) return;
+            let list = getWithdrawalRequests();
+
+            if(list.length === 0) {
+                target.innerHTML = `<p style='color:#777; font-size:13px;'>No pending withdrawal logs submitted.</p>`;
+                return;
+            }
+
+            let html = "";
+            list.forEach((w, idx) => {
+                html += `
+                <div class="admin-sub-card" style="font-size:12px; margin-bottom:8px; background:${w.status==='PENDING'?'#fff8e7':'#f1f5f9'};">
+                    <p><strong>Request Token ID:</strong> ${w.id} (${w.status})</p>
+                    <p><strong>Client Phone:</strong> ${w.phone}</p>
+                    <p><strong>Withdrawal Value Amount:</strong> ₦${w.amount}</p>
+                    <p><strong>Bank Target Profile:</strong> ${w.accountNumber} - ${w.accountName}</p>
+                    <p style="color:#666; font-size:10px;">Submitted: ${w.timestamp}</p>
+                    ${w.status === "PENDING" ? `
+                    <div class="admin-action-row">
+                        <button class="btn-admin-accept" onclick="executeAdminProcessWithdrawalAction(${idx}, true)">Pay & Complete</button>
+                        <button class="btn-admin-reject" onclick="executeAdminProcessWithdrawalAction(${idx}, false)">Deny / Refund</button>
+                    </div>` : ""}
+                </div>`;
+            });
+            target.innerHTML = html;
+        }
+
+        function executeAdminProcessWithdrawalAction(index, isApproved) {
+            let list = getWithdrawalRequests();
+            let req = list[index];
+
+            let users = getRegisteredUsers();
+
+            if(isApproved) {
+                req.status = "APPROVED";
+                if(users[req.phone]) {
+                    if(!users[req.phone].messages) users[req.phone].messages = [];
+                    users[req.phone].messages.unshift({
+                        id: "WD-APP-" + req.id,
+                        sender: "DISBURSEMENT SWITCH",
+                        text: `Your withdrawal request of ₦${req.amount} has been fully approved and successfully credited out to your bank account.`,
+                        date: new Date().toLocaleString()
+                    });
+                }
+            } else {
+                req.status = "REJECTED";
+                if(users[req.phone]) {
+                    users[req.phone].balance += req.amount; // Refund onto wallet
+                    if(!users[req.phone].messages) users[req.phone].messages = [];
+                    users[req.phone].messages.unshift({
+                        id: "WD-REF-" + req.id,
+                        sender: "DISBURSEMENT REFUND",
+                        text: `Your withdrawal request of ₦${req.amount} was rejected. Funds have been safely reversed onto your available balance ledger.`,
+                        date: new Date().toLocaleString()
+                    });
+                }
+            }
+
+            saveWithdrawalRequests(list);
+            saveRegisteredUsers(users);
+            renderAdminDashboardStreams();
+        }
+
+        // MASS MESSAGES LOGISTICS
+        function executeAdminSendSystemMessage() {
+            let type = document.getElementById('adminMsgTargetType').value;
+            let phoneTarget = document.getElementById('adminMsgTargetPhone').value.trim();
+            let contentText = document.getElementById('adminMsgContent').value.trim();
+
+            if(!contentText) return;
+            let users = getRegisteredUsers();
+
+            let timestamp = new Date().toLocaleString();
+            let newPayload = { id: "MSG-" + Math.floor(Math.random()*1000000), sender: "SYSTEM CONTROL", text: contentText, date: timestamp };
+
+            if(type === "ALL") {
+                Object.keys(users).forEach(k => {
+                    if(!users[k].messages) users[k].messages = [];
+                    users[k].messages.unshift(newPayload);
+                });
+                alert("Broadcast sent.");
+            } else {
+                if(!users[phoneTarget]) { alert("Target phone not found."); return; }
+                if(!users[phoneTarget].messages) users[phoneTarget].messages = [];
+                users[phoneTarget].messages.unshift(newPayload);
+                alert("Message sent to target phone user.");
+            }
+
+            document.getElementById('adminMsgContent').value = "";
+            saveRegisteredUsers(users);
+        }
+
+        // GENERATE VOUCHERS
+        function executeAdminGenerateCode() {
+            let amountVal = document.getElementById('adminCodeAmount').value.trim();
+            if(amountVal === "" || isNaN(parseFloat(amountVal))) return;
+
+            let numericVal = parseFloat(amountVal);
+            let randomPin = "TX-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            let codesDb = getDepositCodes();
+            codesDb[randomPin] = { amount: numericVal, active: true };
+
+            saveDepositCodes(codesDb);
+            document.getElementById('adminCodeAmount').value = "";
+            alert(`Generated Pin Token:\n${randomPin}`);
+            renderAdminDashboardStreams();
+        }
+
+        function renderAdminVoucherPinTokens() {
+            let target = document.getElementById('adminVoucherTokensList');
+            if(!target) return;
+            let db = getDepositCodes();
+            let keys = Object.keys(db).filter(k => db[k].active);
+
+            if(keys.length === 0) {
+                target.innerHTML = `<p style='color:#777; font-size:13px;'>No active voucher tokens.</p>`;
+                return;
+            }
+
+            let html = "";
+            keys.forEach(k => {
+                html += `
+                <div class="admin-item-row" style="background:#eefdf6; border-color:#bbf7d0;">
+                    <div>Code: <strong>${k}</strong></div>
+                    <div>Value: <strong>₦${db[k].amount}</strong></div>
+                </div>`;
+            });
+            target.innerHTML = html;
+        }
+
+        // ONLOAD LIFECYCLE TARGETS INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            getInvestmentProductsMarket(); 
+            renderAdminDepositRequests();
+        });
+    </script>
+</body>
+</html>
